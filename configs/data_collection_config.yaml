@@ -1,0 +1,180 @@
+# Data Collection Configuration for GLBA Training Data
+
+# General collection settings
+collection:
+  max_documents: 50000
+  date_range:
+    start: "2010-01-01"
+    end: "2024-12-31"
+  output_format: "csv"  # csv, json, parquet
+  
+# Westlaw scraper configuration
+westlaw:
+  enabled: true
+  base_url: "https://westlaw.com"
+  search_terms:
+    - "Gramm-Leach-Bliley Act"
+    - "GLBA violation"
+    - "privacy notice requirements"
+    - "safeguards rule"
+    - "pretexting violation"
+    - "financial privacy rule"
+  
+  databases:
+    - "ALLFEDS"  # All Federal Cases
+    - "ALLSTATES"  # All State Cases
+    - "CFR"  # Code of Federal Regulations
+    - "FR"  # Federal Register
+  
+  filters:
+    document_types:
+      - "cases"
+      - "statutes"
+      - "regulations"
+      - "administrative_materials"
+    jurisdictions:
+      - "federal"
+      - "all_states"
+  
+  rate_limiting:
+    requests_per_minute: 10
+    delay_between_requests: 6  # seconds
+    max_retries: 3
+
+# Nexis Uni scraper configuration
+nexisuni:
+  enabled: true
+  base_url: "https://nexisuni.com"
+  search_terms:
+    - "Gramm Leach Bliley"
+    - "GLBA enforcement"
+    - "financial privacy violation"
+    - "safeguards rule compliance"
+    - "pretexting financial information"
+  
+  sources:
+    - "Legal News"
+    - "Federal Register"
+    - "Administrative Materials"
+    - "Law Reviews"
+  
+  content_types:
+    - "full_text"
+    - "abstracts"
+  
+  rate_limiting:
+    requests_per_minute: 15
+    delay_between_requests: 4
+    max_retries: 3
+
+# SEC filings and enforcement actions
+sec:
+  enabled: true
+  base_url: "https://www.sec.gov"
+  endpoints:
+    - "/litigation/admin"
+    - "/litigation/litreleases"
+    - "/rules/final"
+  
+  search_terms:
+    - "Gramm-Leach-Bliley"
+    - "Regulation S-P"
+    - "customer information"
+    - "privacy notice"
+
+# Federal regulatory sources
+federal_sources:
+  federal_register:
+    enabled: true
+    base_url: "https://www.federalregister.gov"
+    agencies:
+      - "federal-trade-commission"
+      - "comptroller-of-the-currency"
+      - "federal-reserve-system"
+      - "federal-deposit-insurance-corporation"
+  
+  ftc:
+    enabled: true
+    base_url: "https://www.ftc.gov"
+    sections:
+      - "/enforcement/cases-proceedings"
+      - "/policy/reports"
+      - "/legal-resources"
+
+# Document processing
+processing:
+  text_extraction:
+    pdf_method: "pdfplumber"  # pdfplumber, pymupdf, pdfminer
+    ocr_enabled: true
+    ocr_engine: "tesseract"
+  
+  cleaning:
+    remove_headers_footers: true
+    remove_page_numbers: true
+    normalize_whitespace: true
+    preserve_paragraph_structure: true
+  
+  filtering:
+    min_document_length: 100
+    max_document_length: 50000
+    language: "en"
+    relevance_threshold: 0.7
+
+# Data validation and quality
+validation:
+  duplicate_detection:
+    method: "text_similarity"
+    threshold: 0.85
+    hash_method: "sha256"
+  
+  content_validation:
+    check_language: true
+    check_encoding: true
+    min_text_quality_score: 0.6
+  
+  metadata_requirements:
+    required_fields:
+      - "source"
+      - "date"
+      - "title"
+      - "content"
+    optional_fields:
+      - "author"
+      - "jurisdiction"
+      - "case_number"
+      - "document_type"
+
+# Storage and output
+storage:
+  raw_data_dir: "data/raw"
+  processed_data_dir: "data/processed"
+  cache_dir: "data/cache"
+  
+  file_naming:
+    include_timestamp: true
+    include_source: true
+    format: "{source}_{date}_{hash}.{ext}"
+  
+  compression:
+    enabled: true
+    method: "gzip"
+
+# Logging and monitoring
+logging:
+  level: "INFO"
+  file: "logs/data_collection.log"
+  max_file_size: "100MB"
+  backup_count: 5
+  
+  metrics:
+    track_success_rate: true
+    track_processing_time: true
+    track_data_quality: true
+
+# Error handling
+error_handling:
+  max_retries: 3
+  retry_delay: 5  # seconds
+  continue_on_error: true
+  save_failed_urls: true
+  failed_urls_file: "logs/failed_urls.txt"

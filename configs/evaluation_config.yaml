@@ -1,0 +1,232 @@
+# Evaluation Configuration for GLBA Model
+
+# General evaluation settings
+evaluation:
+  test_split: 0.2
+  cross_validation: false
+  cv_folds: 5
+  stratified: true
+  random_seed: 42
+
+# Metrics configuration
+metrics:
+  # Standard classification metrics
+  basic_metrics:
+    - "accuracy"
+    - "balanced_accuracy"
+    - "precision_macro"
+    - "precision_weighted"
+    - "recall_macro"
+    - "recall_weighted"
+    - "f1_macro"
+    - "f1_weighted"
+    - "matthews_corrcoef"
+    - "cohen_kappa"
+  
+  # Per-class metrics
+  per_class_metrics:
+    - "precision"
+    - "recall"
+    - "f1_score"
+    - "support"
+  
+  # Domain-specific metrics for GLBA
+  domain_metrics:
+    - "violation_detection_rate"  # Recall for violation classes
+    - "false_positive_rate"       # FP rate for "No Violation"
+    - "glba_precision"            # Precision for GLBA violations
+    - "safeguards_precision"      # Precision for Safeguards violations
+    - "pretexting_precision"      # Precision for Pretexting violations
+    - "high_confidence_prediction_rate"
+    - "high_confidence_accuracy"
+  
+  # Probability-based metrics
+  probability_metrics:
+    - "roc_auc_weighted"
+    - "roc_auc_macro"
+    - "log_loss"
+    - "brier_score"
+
+# Class configuration
+classes:
+  names:
+    - "No Violation"
+    - "GLBA Violation"
+    - "Safeguards Violation"
+    - "Pretexting Violation"
+  
+  labels: [0, 1, 2, 3]
+  
+  # Weights for evaluation (if needed)
+  class_weights:
+    0: 1.0  # No Violation
+    1: 2.0  # GLBA Violation
+    2: 2.0  # Safeguards Violation
+    3: 2.5  # Pretexting Violation
+
+# Confidence thresholds
+confidence:
+  high_confidence_threshold: 0.8
+  medium_confidence_threshold: 0.6
+  low_confidence_threshold: 0.4
+  
+  # Calibration evaluation
+  calibration_bins: 10
+  reliability_diagram: true
+
+# Visualization settings
+visualization:
+  enabled: true
+  output_dir: "evaluation/plots"
+  
+  plots:
+    confusion_matrix:
+      enabled: true
+      normalize: [false, true]  # Both raw counts and normalized
+      figsize: [8, 6]
+      save_format: "png"
+    
+    roc_curves:
+      enabled: true
+      per_class: true
+      figsize: [10, 8]
+      save_format: "png"
+    
+    precision_recall_curves:
+      enabled: true
+      per_class: true
+      figsize: [10, 8]
+      save_format: "png"
+    
+    class_distribution:
+      enabled: true
+      show_predictions: true
+      figsize: [12, 6]
+    
+    confidence_histogram:
+      enabled: true
+      bins: 20
+      figsize: [10, 6]
+    
+    calibration_plot:
+      enabled: true
+      figsize: [8, 6]
+
+# Error analysis
+error_analysis:
+  enabled: true
+  
+  misclassification_analysis:
+    enabled: true
+    top_k_errors: 10
+    save_examples: true
+    examples_file: "evaluation/misclassification_examples.csv"
+  
+  confusion_pairs:
+    analyze_pairs: true
+    min_confusion_count: 5
+  
+  low_confidence_analysis:
+    enabled: true
+    threshold: 0.5
+    save_examples: true
+
+# Model comparison
+comparison:
+  enabled: false
+  baseline_models: []
+  
+  comparison_metrics:
+    - "f1_weighted"
+    - "violation_detection_rate"
+    - "false_positive_rate"
+    - "high_confidence_accuracy"
+  
+  statistical_tests:
+    - "mcnemar"
+    - "wilcoxon"
+
+# Interpretability analysis
+interpretability:
+  enabled: true
+  
+  attention_analysis:
+    enabled: true
+    sample_size: 100
+    save_visualizations: true
+    output_dir: "evaluation/attention"
+  
+  feature_importance:
+    enabled: true
+    method: "lime"  # lime, shap
+    sample_size: 50
+    
+  token_analysis:
+    enabled: true
+    top_k_tokens: 20
+    per_class: true
+
+# Reporting
+reporting:
+  formats: ["json", "html", "pdf"]
+  
+  json_report:
+    filename: "evaluation_report.json"
+    include_raw_data: false
+  
+  html_report:
+    filename: "evaluation_report.html"
+    include_plots: true
+    template: "default"
+  
+  pdf_report:
+    filename: "evaluation_report.pdf"
+    include_plots: true
+    sections:
+      - "executive_summary"
+      - "metrics_overview"
+      - "per_class_analysis"
+      - "domain_specific_metrics"
+      - "error_analysis"
+      - "recommendations"
+
+# Validation settings
+validation:
+  # Data validation
+  check_label_distribution: true
+  min_samples_per_class: 10
+  
+  # Prediction validation
+  check_probability_sum: true
+  probability_tolerance: 0.01
+  
+  # Consistency checks
+  check_metric_consistency: true
+  sanity_check_metrics: true
+
+# Performance monitoring
+monitoring:
+  track_inference_time: true
+  memory_usage: true
+  batch_processing_stats: true
+  
+  thresholds:
+    max_inference_time: 5.0  # seconds per batch
+    max_memory_usage: "4GB"
+
+# Export settings
+export:
+  predictions:
+    save_predictions: true
+    filename: "predictions.csv"
+    include_probabilities: true
+    include_confidence: true
+  
+  metrics:
+    save_detailed_metrics: true
+    filename: "detailed_metrics.json"
+  
+  model_artifacts:
+    save_confusion_matrix: true
+    save_classification_report: true
+    save_roc_data: true

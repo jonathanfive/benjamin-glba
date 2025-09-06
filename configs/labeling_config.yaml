@@ -1,0 +1,84 @@
+# GLBA Labeling Configuration
+
+labeling:
+  confidence_threshold: 0.6
+  auto_labeling: true
+  manual_review_threshold: 0.4
+  
+keywords:
+  glba_core:
+    - "nonpublic personal information"
+    - "npi"
+    - "customer information"
+    - "privacy notice"
+    - "privacy policy"
+    - "opt out"
+    - "opt-out"
+    - "gramm leach bliley"
+    - "gramm-leach-bliley"
+    - "glba"
+    - "financial privacy rule"
+    - "privacy rule"
+  
+  safeguards:
+    - "safeguards rule"
+    - "safeguard"
+    - "information security"
+    - "access controls"
+    - "encryption"
+    - "data security"
+    - "administrative safeguards"
+    - "physical safeguards"
+    - "technical safeguards"
+    - "information systems"
+    - "security incident"
+    - "data breach"
+    - "unauthorized access"
+  
+  pretexting:
+    - "pretexting"
+    - "pretext"
+    - "false pretense"
+    - "false pretences"
+    - "impersonation"
+    - "social engineering"
+    - "fraudulent solicitation"
+    - "deceptive practice"
+    - "misrepresentation"
+    - "unauthorized disclosure"
+
+violation_patterns:
+  glba:
+    - "fail(?:ed|ure)?\\s+to\\s+(?:provide|deliver|send)\\s+.*privacy\\s+notice"
+    - "(?:disclosed|shared|revealed)\\s+.*(?:nonpublic|customer|personal)\\s+information"
+    - "privacy\\s+notice\\s+(?:not\\s+)?(?:provided|delivered|sent)"
+    - "unauthorized\\s+(?:disclosure|sharing)\\s+of\\s+(?:customer|personal)\\s+information"
+  
+  safeguards:
+    - "(?:inadequate|insufficient|lack\\s+of)\\s+(?:safeguards|security|protection)"
+    - "(?:failed|failure)\\s+to\\s+(?:implement|maintain|establish)\\s+safeguards"
+    - "(?:data|security)\\s+breach\\s+(?:due\\s+to|caused\\s+by)\\s+inadequate"
+    - "(?:unauthorized\\s+access|security\\s+incident)\\s+due\\s+to"
+  
+  pretexting:
+    - "pretext(?:ing)?\\s+(?:to\\s+obtain|for\\s+obtaining|attempt)"
+    - "(?:false\\s+pretense|impersonat|fraudulent(?:ly)?)\\s+(?:obtain|solicit|request)"
+    - "social\\s+engineering\\s+(?:attack|attempt|to\\s+obtain)"
+    - "(?:deceptive|fraudulent)\\s+(?:practice|solicitation|request)"
+
+data_quality:
+  min_text_length: 50
+  max_text_length: 5000
+  remove_duplicates: true
+  similarity_threshold: 0.95
+  
+balance:
+  method: "undersample"  # oversample, undersample, none
+  max_samples_per_class: 10000
+  preserve_high_confidence: true
+
+output:
+  labeled_data_path: "data/labeled/auto_labeled.csv"
+  high_confidence_path: "data/labeled/high_confidence.csv"
+  review_needed_path: "data/labeled/needs_review.csv"
+  stats_path: "data/labeled/labeling_stats.json"

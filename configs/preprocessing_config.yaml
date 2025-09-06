@@ -1,0 +1,184 @@
+# Text Preprocessing Configuration for GLBA Model
+
+# General preprocessing settings
+preprocessing:
+  batch_size: 1000
+  parallel_processing: true
+  num_workers: 4
+  cache_processed: true
+  cache_dir: ".cache/preprocessing"
+
+# Text cleaning configuration
+text_cleaning:
+  # Legal document specific settings
+  preserve_legal_structure: false  # For training, remove structure
+  preserve_citations: false        # For training, remove citations
+  normalize_financial_terms: true
+  
+  # Length constraints
+  max_length: 512
+  min_length: 10
+  truncation_strategy: "sentence_boundary"  # sentence_boundary, hard_truncate
+  
+  # Unicode and character handling
+  normalize_unicode: true
+  remove_non_printable: true
+  preserve_legal_symbols: true
+  
+  # OCR error correction
+  fix_ocr_errors: true
+  ocr_corrections:
+    enabled: true
+    common_errors:
+      "I(?=\\s+[a-z])": "l"
+      "0(?=\\s*[a-z])": "o"
+      "(?<=[a-z])\\s+1\\s+(?=[a-z])": " l "
+      "m(?=\\s+the\\b)": "in"
+  
+  # Special character handling
+  smart_quotes_to_standard: true
+  em_dash_to_double_dash: true
+  normalize_ellipsis: true
+
+# Financial term normalization
+financial_terms:
+  abbreviations:
+    "npi": "nonpublic personal information"
+    "n.p.i.": "nonpublic personal information"
+    "cust info": "customer information"
+    "customer info": "customer information"
+    "acct": "account"
+    "w/": "with"
+    "w/o": "without"
+    "fin inst": "financial institution"
+    "financial inst": "financial institution"
+    
+  glba_terms:
+    "gramm leach bliley act": "gramm-leach-bliley act"
+    "gramm-leach bliley act": "gramm-leach-bliley act"
+    "privacy regs": "privacy regulations"
+    "safeguards regs": "safeguards regulations"
+    
+  institution_types:
+    "credit union": "credit union"
+    "broker dealer": "broker-dealer"
+    "investment adviser": "investment advisor"
+
+# Domain-specific tokenization
+tokenization:
+  model_name: "distilbert-base-uncased"
+  
+  # Domain tokens to add
+  domain_tokens:
+    - "[GLBA]"
+    - "[SAFEGUARDS]"
+    - "[PRETEXTING]"
+    - "[PII]"
+    - "[PHI]"
+    - "[FINANCIAL_INFO]"
+    - "[CUSTOMER_DATA]"
+    - "[PRIVACY_NOTICE]"
+  
+  # Token insertion rules
+  token_insertion:
+    enabled: true
+    rules:
+      "nonpublic personal information": "[PII] nonpublic personal information [/PII]"
+      "customer information": "[CUSTOMER_DATA] customer information [/CUSTOMER_DATA]"
+      "privacy notice": "[PRIVACY_NOTICE] privacy notice [/PRIVACY_NOTICE]"
+      "safeguards rule": "[SAFEGUARDS] safeguards rule [/SAFEGUARDS]"
+      "pretexting": "[PRETEXTING] pretexting [/PRETEXTING]"
+      "financial information": "[FINANCIAL_INFO] financial information [/FINANCIAL_INFO]"
+
+# Text segmentation
+segmentation:
+  strategy: "sentence"  # sentence, paragraph, fixed_length
+  max_segment_length: 512
+  overlap: 50
+  preserve_sentence_boundaries: true
+  
+  # For legal documents
+  section_boundaries:
+    - "SECTION"
+    - "SEC\\."
+    - "§"
+  
+  paragraph_markers:
+    - "\\n\\n"
+    - "\\([a-z0-9]+\\)"
+    - "^\\d+\\."
+
+# Data augmentation (optional)
+augmentation:
+  enabled: false
+  techniques:
+    synonym_replacement:
+      enabled: false
+      probability: 0.1
+      max_replacements: 3
+    
+    back_translation:
+      enabled: false
+      intermediate_languages: ["es", "fr", "de"]
+    
+    paraphrasing:
+      enabled: false
+      model: "t5-base"
+      probability: 0.05
+
+# Quality filtering
+quality_filtering:
+  # Content quality checks
+  min_unique_tokens: 10
+  max_repeated_phrases: 0.3
+  min_readability_score: 0.3
+  
+  # Legal document specific
+  require_legal_keywords: false
+  legal_keyword_threshold: 2
+  
+  # Language and encoding
+  language_detection: true
+  required_language: "en"
+  language_confidence: 0.8
+  
+  # Duplicate detection
+  duplicate_detection:
+    enabled: true
+    method: "fuzzy_hash"  # exact, fuzzy_hash, embedding
+    threshold: 0.85
+
+# Output formatting
+output:
+  format: "csv"  # csv, json, parquet
+  columns:
+    - "text"
+    - "cleaned_text"
+    - "label"
+    - "source"
+    - "metadata"
+  
+  include_metadata: true
+  metadata_fields:
+    - "original_length"
+    - "cleaned_length"
+    - "processing_time"
+    - "quality_score"
+    - "language_detected"
+
+# Validation
+validation:
+  sample_size: 100
+  manual_review: true
+  quality_metrics:
+    - "text_length_distribution"
+    - "vocabulary_size"
+    - "cleaning_effectiveness"
+    - "token_distribution"
+
+# Performance optimization
+performance:
+  chunk_size: 1000
+  memory_limit: "2GB"
+  temp_dir: "/tmp/glba_preprocessing"
+  cleanup_temp: true
